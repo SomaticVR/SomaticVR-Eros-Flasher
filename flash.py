@@ -1,6 +1,8 @@
 import serial.tools.list_ports as port_list
 import serial
 import esptool
+import sys
+
 # import wait_key.wait_key as wait_key
 def wait_key():
     input("Press <ENTER> to continue")
