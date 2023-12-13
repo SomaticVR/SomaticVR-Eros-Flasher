@@ -2,6 +2,7 @@ import serial.tools.list_ports as port_list
 import serial
 import esptool
 import sys
+import time
 
 # import wait_key.wait_key as wait_key
 def wait_key():
@@ -19,11 +20,10 @@ def flash(port):
     print(f'Using command {" ".join(command)}')
     esptool.main(command)
 
-def sendCommand(port, command, expected, timeout=1):
-    with serial.Serial(port.device, 9600, timeout=timeout) as ser:
-        print (f"connecting to {ser.name} and sending command {command}")
-        if (ser.write((command + "\n").encode('utf-8')) > 0):
-            ser.read_until(expected=expected)
+def sendCommand(ser, command, expected, timeout=1):
+    print (f"connecting to {ser.name} and sending command {command}")
+    if (ser.write((command).encode('utf-8')) > 0):
+        ser.read_until(expected=expected)
 
 def setWifi(port, ssid, passwd):
     sendCommand(port, f'SET WIFI "{ssid}" "{passwd}"', "CMD SET WIFI OK:")
@@ -33,18 +33,20 @@ def factoryReset(port):
     sendCommand(port, "FRST", "FACTORY RESET")
     print("Factory Reset Completed. Device will shut down unless charging.")
 
-if (len(sys.argv) > 2):
+if True: #(len(sys.argv) > 2):
     ssid = str(sys.argv[1])
     passwd = str(sys.argv[2])
 
     while True:
         ports = list(port_list.grep("303A:1001"))
         if ports:
+            time.sleep(1)
             flash(ports[0])
             wait_key()
-            setWifi(ports[0], ssid, passwd)
-            wait_key()
-            # factoryReset(ports[0])
+            # with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
+            #     setWifi(ser, ssid, passwd)
+            #     wait_key()
+            #     factoryReset(ser)
             # wait_key()
 else:
     print("Error: 2 arguments required")

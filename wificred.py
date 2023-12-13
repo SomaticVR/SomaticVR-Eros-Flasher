@@ -15,9 +15,8 @@ if (len(sys.argv) > 2):
             # ser.open()
             print (f"connecting to {ser.name}")
             if (ser.write(f'SET WIFI "{ssid}"" "{passwd}"'.encode('utf-8')) > 0):
-                # print(ser.readline())
-                # if (ser.write(b'REBOOT') > 0):
+                ser.read_until(expected="CMD SET WIFI OK:")
                 print("WiFi information updated")
 else:
     print("Error: 2 arguments required")
-    print(f"{sys.argv[0]} [ssid] [passwd]")+
+    print(f"{sys.argv[0]} [ssid] [passwd]")
