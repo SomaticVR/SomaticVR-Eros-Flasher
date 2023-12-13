@@ -48,6 +48,9 @@ while True:
         #     wait_key()
         #     factoryReset(ser)
         # wait_key()
+    else:
+        print("No devices found. Exiting...")
+        break
 # else:
 #     print("Error: 2 arguments required")
 #     print(f"{sys.argv[0]} [ssid] [passwd]")
