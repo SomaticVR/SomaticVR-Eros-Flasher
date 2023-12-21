@@ -3,18 +3,39 @@ from tkinter import filedialog, ttk
 import esptool
 import requests
 import os
+import sys
 import threading
 import serial.tools.list_ports
+import re
+
+class TextRedirector(object):
+    def __init__(self, widget, rootwin):
+        self.widget = widget
+        self.rootwin = rootwin
+
+    def write(self, string):
+        value = re.findall("\(([0-9]*) \%\)", string)
+        #print(value)
+        # self.widget["value"] = value
+        if value:
+            # self.widget.insert("end", int(value[0]))
+            self.widget["value"] = int(value[0])
+        # self.widget.configure(state="disabled")
+        self.rootwin.update_idletasks()
+
+    def flush(self):
+        pass
 
 class SomaticErosFirmwareUpdater:
     def __init__(self, root):
         self.root = root
+        self.root.geometry("640x480")
         self.root.title("Somatic Eros Firmware Update")
 
         self.label = tk.Label(root, text="Please plug in your tracker and hold down the button while flashing.")
         self.label.pack(pady=10)
 
-        self.file_path_var = tk.StringVar()
+        # self.file_path_var = tk.StringVar()
         # self.entry = tk.Entry(root, textvariable=self.file_path_var, state="readonly", width=50)
         # self.entry.pack(pady=10)
 
@@ -24,8 +45,15 @@ class SomaticErosFirmwareUpdater:
         self.status_bar = tk.Label(root, text="", bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
+        self.v_scrollbar = tk.Scrollbar(root, orient='vertical')
+        # self.v_scrollbar.pack(side=tk.RIGHT, fill='none')
+        # self.text_output = tk.Text(root, height=5, width=40)#, yscrollcommand=self.v_scrollbar.set)
+        # self.text_output.pack(side=tk.BOTTOM)
+
         # self.download_progress = ttk.Progressbar(root, orient="horizontal", length=300, mode="determinate")
-        self.update_progress = ttk.Progressbar(root, orient="horizontal", length=300, mode="determinate")
+        self.update_progress = ttk.Progressbar(root, orient="horizontal", length=300, maximum = 100, mode="determinate")
+        self.update_progress.pack(side=tk.BOTTOM, fill=tk.X)
+        sys.stdout = TextRedirector(self.update_progress, root)
 
         self.update_button = tk.Button(root, text="Update Firmware", command=self.open_port_window, state=tk.DISABLED)
         self.update_button.pack(pady=10)
@@ -59,7 +87,7 @@ class SomaticErosFirmwareUpdater:
             port_menu = tk.OptionMenu(port_window, port_var, *port_list)
             port_menu.pack(pady=10)
 
-            confirm_button = tk.Button(port_window, text="Confirm", command=lambda: self.update_firmware(port_var.get(), port_window))
+            confirm_button = tk.Button(port_window, text="Confirm", command= self.update_firmware(port_var.get(), port_window))#lambda port_var, port_window: threading.Thread(target = self.update_firmware, args = (port_var.get(), port_window)).start())
             confirm_button.pack(pady=10)
         else:
             pass
@@ -89,7 +117,7 @@ class SomaticErosFirmwareUpdater:
 
     def update_firmware(self, selected_port, port_window = None):
         firmware_file = "firmware.bin"  # Specify the local file name
-
+        self.update_progress["value"] = 0  # Reset progress bar for the next update
         if not firmware_file:
             self.update_status("Please select a firmware file.")
             return
@@ -105,7 +133,7 @@ class SomaticErosFirmwareUpdater:
 
         if port_window is not None:
             port_window.destroy()  # Close the port selection window
-
+        self.update_status("Firmware update started... Please wait")
         try:
             # Run esptool to flash the firmware
             command = ['--chip', 'esp32c3', '--port', selected_port, '--baud', '460800'] 
@@ -116,19 +144,16 @@ class SomaticErosFirmwareUpdater:
             # command.extend(['0xe000', './Firmware/boot_app0.bin'])
             # command.extend(['0x10000', firmware_file])
             command.extend(['0x0000', firmware_file])
-            buffer = ""
-            # originalStdout = sys.stdout
-            # sys.stdout = buffer;
+            
+            
             print(f'Using command {" ".join(command)}')
             esptool.main(command)
-            # sys.stdout = originalStdout
-
 
             self.update_status("Firmware updated successfully!")
+
         except Exception as e:
             self.update_status(f"Firmware update failed: {e}")
 
-        self.update_progress["value"] = 0
         self.root.update_idletasks()
 
     def set_update_progress(self, position, total):
