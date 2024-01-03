@@ -39,8 +39,8 @@ class SomaticErosFirmwareUpdater:
         # self.entry = tk.Entry(root, textvariable=self.file_path_var, state="readonly", width=50)
         # self.entry.pack(pady=10)
 
-        # self.browse_button = tk.Button(root, text="Browse", command=self.browse_file)
-        # self.browse_button.pack(pady=10)
+        self.browse_button = tk.Button(root, text="Browse", command=self.browse_file)
+        self.browse_button.pack(pady=10)
 
         self.status_bar = tk.Label(root, text="", bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
@@ -59,15 +59,16 @@ class SomaticErosFirmwareUpdater:
         self.update_button.pack(pady=10)
 
         # Download firmware file from the new URL
-        firmware_url = "https://github.com/SomaticVR/SomaticVR-Eros-Flasher/raw/main/Firmware/firmware.bin"
-        firmware_file = "firmware.bin"  # Specify the local file name
+        firmware_url = "https://github.com/SomaticVR/SomaticVR-Eros-Flasher/raw/main/Firmware/firmware.hex"
+        self.firmware_file = "firmware.hex"  # Specify the local file name
 
-        download_thread = threading.Thread(target=self.download_firmware, args=(firmware_url, firmware_file))
+        download_thread = threading.Thread(target=self.download_firmware, args=(firmware_url, self.firmware_file))
         download_thread.start()
 
     def browse_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Firmware Files", "*.bin")])
-        self.file_path_var.set(file_path)
+        file_path = filedialog.askopenfilename(filetypes=[("Firmware Files", "*.bin, *.hex")])
+        if file_path is not None:
+            self.firmware_file = file_path
 
     def open_port_window(self):
         # Get a list of serial ports that match the specified criteria
@@ -116,9 +117,8 @@ class SomaticErosFirmwareUpdater:
             self.update_status(f"Failed to download firmware: {e}")
 
     def update_firmware(self, selected_port, port_window = None):
-        firmware_file = "firmware.bin"  # Specify the local file name
         self.update_progress["value"] = 0  # Reset progress bar for the next update
-        if not firmware_file:
+        if not self.firmware_file:
             self.update_status("Please select a firmware file.")
             return
 
@@ -143,9 +143,9 @@ class SomaticErosFirmwareUpdater:
             # command.extend(['0x8000', './Firmware/partitions.bin'])
             # command.extend(['0xe000', './Firmware/boot_app0.bin'])
             # command.extend(['0x10000', firmware_file])
-            command.extend(['0x0000', firmware_file])
-            
-            
+            command.extend(['0x0000', self.firmware_file])
+
+
             print(f'Using command {" ".join(command)}')
             esptool.main(command)
 
