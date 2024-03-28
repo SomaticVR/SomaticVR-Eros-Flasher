@@ -46,12 +46,12 @@ while True:
             time.sleep(1)
             flash(ports[0])
             wait_key()
-            with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
-                setWifi(ser, ssid, passwd)
-                wait_key()
+            # with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
+                # setWifi(ser, ssid, passwd)
+                # wait_key()
                 # factoryReset(ser)
-                time.sleep(1)
-            wait_key()
+                # time.sleep(1)
+            # wait_key()
     except (PermissionError):
         pass
     # else:
