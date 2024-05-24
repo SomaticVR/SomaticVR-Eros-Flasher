@@ -35,3 +35,13 @@ jobs:
         with:
           name: SomaticVR-Eros-Flasher
           path: build/exe.win-amd64-3.10/
+
+      - name: Upload to draft release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            build/exe.win-amd64-3.10/*
+  
