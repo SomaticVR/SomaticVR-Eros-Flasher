@@ -24,11 +24,11 @@ jobs:
       - name: Run builds
         run: python build.py build
 
-      # - name: Package binaries
-      #   uses: vimtor/action-zip@v1.2
-      #   with:
-      #     files: build/exe.win-amd64-3.10/
-      #     dest: SomaticVR-Eros-Flasher.zip
+      - name: Package binaries
+        uses: vimtor/action-zip@v1.2
+        with:
+          files: build/exe.win-amd64-3.10/
+          dest: SomaticVR-Eros-Flasher.zip
 
       - name: Upload zip
         uses: actions/upload-artifact@v4
@@ -43,5 +43,5 @@ jobs:
           draft: true
           generate_release_notes: true
           files: |
-            build/exe.win-amd64-3.10/*
+            SomaticVR-Eros-Flasher.zip
   
