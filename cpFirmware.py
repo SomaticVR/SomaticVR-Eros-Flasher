@@ -7,8 +7,8 @@ if (len(sys.argv) > 2):
     # esptool.py --chip ESP32 merge_bin -o merged-flash.bin --flash_mode dio --flash_size 4MB 0x1000 bootloader.bin 0x8000 partition-table.bin 0x10000 app.bin
     command = ['--chip', 'esp32c3'] 
     command.extend(['merge_bin', '--flash_mode', 'dio'])
-    # command.extend(['--format', 'hex'])
-    command.extend(['-o', './Firmware/firmware.bin'])
+    command.extend(['--format', 'hex'])
+    command.extend(['-o', './Firmware/firmware.hex'])
     command.extend(['--flash_size', '4MB'])
     command.extend(['0x0000', str(sys.argv[1]) + '/.pio/build/esp32c3/bootloader.bin'])
     command.extend(['0x8000', str(sys.argv[1]) + '/.pio/build/esp32c3/partitions.bin'])
