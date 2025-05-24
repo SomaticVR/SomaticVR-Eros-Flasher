@@ -33,21 +33,21 @@ def factoryReset(port):
     sendCommand(port, "FRST", "FACTORY RESET")
     print("Factory Reset Completed. Device will shut down unless charging.")
 
-if True: #(len(sys.argv) > 2):
+if (len(sys.argv) > 2):
     ssid = str(sys.argv[1])
     passwd = str(sys.argv[2])
 
-    while True:
-        ports = list(port_list.grep("303A:1001"))
-        if ports:
-            time.sleep(1)
-            flash(ports[0])
-            wait_key()
-            # with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
-            #     setWifi(ser, ssid, passwd)
-            #     wait_key()
-            #     factoryReset(ser)
-            # wait_key()
-else:
-    print("Error: 2 arguments required")
-    print(f"{sys.argv[0]} [ssid] [passwd]")
+while True:
+    ports = list(port_list.grep("303A:1001"))
+    if ports:
+        time.sleep(1)
+        flash(ports[0])
+        wait_key()
+        # with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
+        #     setWifi(ser, ssid, passwd)
+        #     wait_key()
+        #     factoryReset(ser)
+        # wait_key()
+# else:
+#     print("Error: 2 arguments required")
+#     print(f"{sys.argv[0]} [ssid] [passwd]")
