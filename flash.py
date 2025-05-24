@@ -49,7 +49,7 @@ while True:
             with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
                 setWifi(ser, ssid, passwd)
                 wait_key()
-                factoryReset(ser)
+                # factoryReset(ser)
                 time.sleep(1)
             wait_key()
     except (PermissionError):
