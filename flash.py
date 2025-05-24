@@ -12,10 +12,11 @@ def flash(port):
     command = ['--chip', 'esp32c3', '--port', port.device, '--baud', '460800'] 
     command.extend(['--before', 'default_reset', '--after', 'hard_reset', 'write_flash', '-z', '--flash_mode', 'dio'])
     command.extend(['--flash_freq', '80m', '--flash_size', '4MB'])
-    command.extend(['0x0000', './Firmware/bootloader.bin'])
-    command.extend(['0x8000', './Firmware/partitions.bin'])
-    command.extend(['0xe000', './Firmware/boot_app0.bin'])
-    command.extend(['0x10000', './Firmware/firmware.bin'])
+    # command.extend(['0x0000', './Firmware/bootloader.bin'])
+    # command.extend(['0x8000', './Firmware/partitions.bin'])
+    # command.extend(['0xe000', './Firmware/boot_app0.bin'])
+    # command.extend(['0x10000', './Firmware/firmware.bin'])
+    command.extend(['0x0000', './Firmware/firmware.bin'])
 
     print(f'Using command {" ".join(command)}')
     esptool.main(command)
