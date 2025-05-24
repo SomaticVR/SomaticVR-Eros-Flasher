@@ -30,7 +30,7 @@ class SomaticErosFirmwareUpdater:
     def __init__(self, root):
         self.root = root
         self.root.geometry("640x480")
-        self.root.title(f"Somatic Eros Firmware Updater {git_tag()}")
+        self.root.title(f"Somatic Eros Firmware Updater VERSION_REPL_STRING")
 
         self.firmware_file = "firmware.hex"  # Specify the local firmware file name
 

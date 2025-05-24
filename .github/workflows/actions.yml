@@ -21,6 +21,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Replace version string in files
+        uses: richardrigutins/replace-in-files@v2
+        with:
+          files: '**/*.py'
+          search-text: 'VERSION_REPL_STRING'
+          replacement-text: ${{  github.ref_name }}
+          exclude: 'Firmware/**'
+          encoding: 'utf8'
+          max-parallelism: 10
+
       - name: Run builds
         run: python build.py build
 
@@ -44,4 +54,4 @@ jobs:
           generate_release_notes: true
           files: |
             SomaticVR-Eros-Flasher.zip
-  
+    
