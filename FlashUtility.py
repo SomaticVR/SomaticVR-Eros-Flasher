@@ -30,7 +30,7 @@ class SomaticErosFirmwareUpdater:
     def __init__(self, root):
         self.root = root
         self.root.geometry("640x480")
-        self.root.title("Somatic Eros Firmware Updater")
+        self.root.title(f"Somatic Eros Firmware Updater {git_tag()}")
 
         self.firmware_file = "firmware.hex"  # Specify the local firmware file name
 
@@ -247,6 +247,14 @@ class SomaticErosFirmwareUpdater:
         self.status_bar["text"] = message
         self.root.update_idletasks()
 
+def git_tag():
+    import subprocess
+    tag = ""
+    try:
+        tag = subprocess.check_output(["git", "--no-pager", "tag", "--sort", "-taggerdate", "--points-at" , "HEAD"]).strip().decode("utf-8")
+    except Exception:
+        tag = ""
+    return tag
 
 if __name__ == "__main__":
     root = tk.Tk()
