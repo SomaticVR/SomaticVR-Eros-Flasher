@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -14,15 +14,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
 
-      - name: Install pio and its dependencies
+      - name: Install esptool and cx freeze and their dependencies
         run: |
           python -m pip install --upgrade pip
           pip install cx_freeze esptool
 
       - name: Run builds
-        run: python -m cx-freeze .\FlashUtility.py --target-dir dist
+        run: python python build.py build
 
-      - name: Package build
+      - name: Package binaries
         run: zip dist/* dist/SomaticVR-Eros-Flasher.zip
 
       - name: Upload zip
