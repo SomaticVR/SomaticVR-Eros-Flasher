@@ -20,17 +20,18 @@ def flash(port):
     print(f'Using command {" ".join(command)}')
     esptool.main(command)
 
-def sendCommand(ser, command, expected, timeout=1):
-    print (f"connecting to {ser.name} and sending command {command}")
-    if (ser.write((command).encode('utf-8')) > 0):
+def sendCommand(ser, command, expected, timeout=0):
+    print (f"connecting to {ser.name} and sending command {command} then waiting for '{expected}'")
+    if (ser.write((command+"\n").encode('utf-8')) > 0):
         ser.read_until(expected=expected)
 
 def setWifi(port, ssid, passwd):
-    sendCommand(port, f'SET WIFI "{ssid}" "{passwd}"', "CMD SET WIFI OK:")
+    sendCommand(port, f'SET WIFI "{ssid}" "{passwd}"', "Handshake successful")
     print("WiFi information updated")
 
 def factoryReset(port):
-    sendCommand(port, "FRST", "FACTORY RESET")
+    sendCommand(port, "FRST", "entry 0x403")
+    time.sleep(8)
     print("Factory Reset Completed. Device will shut down unless charging.")
 
 if (len(sys.argv) > 2):
@@ -38,19 +39,23 @@ if (len(sys.argv) > 2):
     passwd = str(sys.argv[2])
 
 while True:
-    ports = list(port_list.grep("303A:1001"))
-    if ports:
-        time.sleep(1)
-        flash(ports[0])
-        wait_key()
-        # with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
-        #     setWifi(ser, ssid, passwd)
-        #     wait_key()
-        #     factoryReset(ser)
-        # wait_key()
-    else:
-        print("No devices found. Exiting...")
-        break
+    try:
+        ports = list(port_list.grep("303A:1001"))
+        if ports:
+            time.sleep(1)
+            flash(ports[0])
+            wait_key()
+            with serial.Serial(ports[0].device, 9600, timeout=1) as ser:
+                setWifi(ser, ssid, passwd)
+                wait_key()
+                factoryReset(ser)
+                time.sleep(1)
+            wait_key()
+    except (PermissionError):
+        pass
+    # else:
+    #     print("No devices found. Exiting...")
+    #     break
 # else:
 #     print("Error: 2 arguments required")
 #     print(f"{sys.argv[0]} [ssid] [passwd]")
