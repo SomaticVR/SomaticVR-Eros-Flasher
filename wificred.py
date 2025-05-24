@@ -1,5 +1,6 @@
 import serial.tools.list_ports as port_list
 import serial
+import sys
 
 if (len(sys.argv) > 2):
     ssid = str(sys.argv[1])
@@ -19,4 +20,4 @@ if (len(sys.argv) > 2):
                 print("WiFi information updated")
 else:
     print("Error: 2 arguments required")
-    print(f"{sys.argv[0]} [ssid] [passwd]")
+    print(f"{sys.argv[0]} [ssid] [passwd]")+
