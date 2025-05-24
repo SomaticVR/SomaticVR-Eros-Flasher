@@ -1,0 +1,2 @@
+cx_Freeze==7.0.0
+esptool==4.7.0
