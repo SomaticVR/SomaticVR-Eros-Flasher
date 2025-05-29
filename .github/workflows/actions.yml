@@ -81,7 +81,7 @@ jobs:
           max-parallelism: 10
 
       - name: Run builds
-        run: python build.py build
+        run: python build.py bdist_mac
 
       - name: Package binaries
         uses: vimtor/action-zip@v1.2
