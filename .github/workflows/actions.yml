@@ -86,14 +86,14 @@ jobs:
       - name: Package binaries
         uses: vimtor/action-zip@v1.2
         with:
-          files: build/exe.win-amd64-3.10/
-          dest: SomaticVR-Eros-Flasher.zip
+          files: build/exe.macosx-10.9-universal2-3.10/
+          dest: SomaticVR-Eros-Flasher-macos.zip
 
       - name: Upload zip
         uses: actions/upload-artifact@v4
         with:
-          name: SomaticVR-Eros-Flasher
-          path: build/exe.win-amd64-3.10/
+          name: SomaticVR-Eros-Flasher-macos
+          path: build/exe.macosx-10.9-universal2-3.10/
 
       - name: Upload to draft release
         uses: softprops/action-gh-release@v2
