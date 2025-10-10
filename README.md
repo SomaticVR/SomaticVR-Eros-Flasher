@@ -1,2 +1,2 @@
-# SomaticVR-Eros-Flasher
-Flashing Utility for SomaticVR Eros
+# SomaticVR-Orion-Flasher
+Standalone Flashing Utility for SomaticVR Orion

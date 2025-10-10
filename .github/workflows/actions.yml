@@ -5,8 +5,12 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
+
+    env: 
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -15,6 +19,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10' 
+
+      # - name: Install imagemagick
+      #   uses: ilyasemenov/imagemagick-action@v1.0.0
+        
+      # - name: Create Windows icon
+      #   run: |
+      #     # Convert PNG to ICO
+      #     magick convert "icons/Somatic Logo White.png" -define icon:auto-resize=16,32,48,256 icons/app.ico
+      - name: Create Windows icon
+        uses: jruipinto/ImageMagick-action@v1
+        with:
+          # ImageMagick command to be executed
+          command: magick convert "icons/Somatic Logo White.png" -define icon:auto-resize=16,32,48,256 icons/app.ico
 
       - name: Install requirements and their dependencies
         run: |
@@ -34,16 +51,27 @@ jobs:
       - name: Run builds
         run: python build.py build
 
+      # - name: Sign Windows executable
+      #   if: env.WINDOWS_CERTIFICATE != ''
+      #   uses: peter-evans/signtool-action@v1
+      #   with:
+      #     certificate: ${{ env.WINDOWS_CERTIFICATE }}
+      #     certificate-password: ${{ env.WINDOWS_CERTIFICATE_PASSWORD }}
+      #     description: "SomaticVR Orion Flasher"
+      #     description-url: "https://somaticvr.com"
+      #     timestamp-url: "http://timestamp.digicert.com"
+      #     path: "build/exe.win-amd64-3.10/FlashUtility.exe"
+
       - name: Package binaries
         uses: vimtor/action-zip@v1.2
         with:
           files: build/exe.win-amd64-3.10/
-          dest: SomaticVR-Eros-Flasher.zip
+          dest: SomaticVR-Orion-Flasher.zip
 
       - name: Upload zip
         uses: actions/upload-artifact@v4
         with:
-          name: SomaticVR-Eros-Flasher
+          name: SomaticVR-Orion-Flasher
           path: build/exe.win-amd64-3.10/
 
       - name: Upload to draft release
@@ -53,5 +81,128 @@ jobs:
           draft: false
           generate_release_notes: true
           files: |
-            SomaticVR-Eros-Flasher.zip
+            SomaticVR-Orion-Flasher.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    env: 
+      MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Create macOS icon
+        run: |
+          # Create iconset directory
+          mkdir app.iconset
+          
+          # Generate all required sizes
+          sips -z 16 16     "icons/Somatic Logo White.png" --out app.iconset/icon_16x16.png
+          sips -z 32 32     "icons/Somatic Logo White.png" --out app.iconset/icon_16x16@2x.png
+          sips -z 32 32     "icons/Somatic Logo White.png" --out app.iconset/icon_32x32.png
+          sips -z 64 64     "icons/Somatic Logo White.png" --out app.iconset/icon_32x32@2x.png
+          sips -z 128 128   "icons/Somatic Logo White.png" --out app.iconset/icon_128x128.png
+          sips -z 256 256   "icons/Somatic Logo White.png" --out app.iconset/icon_128x128@2x.png
+          sips -z 256 256   "icons/Somatic Logo White.png" --out app.iconset/icon_256x256.png
+          sips -z 512 512   "icons/Somatic Logo White.png" --out app.iconset/icon_256x256@2x.png
+          sips -z 512 512   "icons/Somatic Logo White.png" --out app.iconset/icon_512x512.png
+          sips -z 1024 1024 "icons/Somatic Logo White.png" --out app.iconset/icon_512x512@2x.png
+          
+          # Convert to icns
+          iconutil -c icns app.iconset -o icons/app.icns
+          
+          # Cleanup
+          rm -rf app.iconset
+
+      - name: Install requirements and their dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Replace version string in files
+        uses: richardrigutins/replace-in-files@v2
+        with:
+          files: '**/*.py'
+          search-text: 'VERSION_REPL_STRING'
+          replacement-text: ${{  github.ref_name }}
+          exclude: 'Firmware/**'
+          encoding: 'utf8'
+          max-parallelism: 10
+
+      - name: Run builds
+        run: python build.py build
+
+      - name: Import Codesign Certificate
+        if: env.MACOS_CERTIFICATE_P12 != ''
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ env.MACOS_CERTIFICATE_P12 }}
+          p12-password: ${{ env.MACOS_CERTIFICATE_PASSWORD }}
+          
+      - name: Sign macOS app
+        if: env.MACOS_CERTIFICATE_P12 != ''
+        run: |
+          # Sign the app bundle
+          codesign --force --options runtime --sign "Developer ID Application: SomaticVR" "build/SomaticVR-Orion-Flasher.app"
+          
+          # Create DMG
+          create-dmg \
+            --volname "SomaticVR Orion Flasher" \
+            --volicon "icons/app.icns" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "SomaticVR-Orion-Flasher.app" 200 190 \
+            --hide-extension "SomaticVR-Orion-Flasher.app" \
+            --app-drop-link 600 185 \
+            "SomaticVR-Orion-Flasher.dmg" \
+            "build/SomaticVR-Orion-Flasher.app"
+            
+          # Sign the DMG
+          codesign --force --options runtime --sign "Developer ID Application: SomaticVR" "SomaticVR-Orion-Flasher.dmg"
+          
+          # Notarize the DMG
+          xcrun notarytool submit "SomaticVR-Orion-Flasher.dmg" \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --wait
+
+      - name: Create unsigned DMG
+        if: env.MACOS_CERTIFICATE_P12 == ''
+        run: |
+          # Create DMG without signing
+          create-dmg \
+            --volname "SomaticVR Orion Flasher" \
+            --volicon "icons/app.icns" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "SomaticVR-Orion-Flasher.app" 200 190 \
+            --hide-extension "SomaticVR-Orion-Flasher.app" \
+            --app-drop-link 600 185 \
+            "SomaticVR-Orion-Flasher.dmg" \
+            "build/SomaticVR-Orion-Flasher.app"
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: SomaticVR-Orion-Flasher-MacOS
+          path: SomaticVR-Orion-Flasher.dmg
+
+      - name: Upload to draft release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: false
+          generate_release_notes: true
+          files: |
+            SomaticVR-Orion-Flasher.dmg
     
