@@ -79,7 +79,7 @@ class SomaticErosFirmwareUpdater:
         self.wifi_button.pack(pady=10)
 
         # Download firmware file from the repository
-        firmware_url = "https://github.com/SomaticVR/SomaticVR-Eros-Flasher/raw/main/Firmware/firmware.hex"
+        firmware_url = "https://github.com/SomaticVR/SomaticVR-Tracker-ESP/releases/latest/download/firmware.hex"
 
         download_thread = threading.Thread(target=self.download_firmware, args=(firmware_url, self.firmware_file))
         download_thread.start()
