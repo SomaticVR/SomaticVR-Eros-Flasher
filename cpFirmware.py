@@ -10,10 +10,10 @@ if (len(sys.argv) > 2):
     command.extend(['--format', 'hex'])
     command.extend(['-o', './Firmware/firmware.hex'])
     command.extend(['--flash_size', '4MB'])
-    command.extend(['0x0000', str(sys.argv[1]) + '/.pio/build/esp32c3/bootloader.bin'])
-    command.extend(['0x8000', str(sys.argv[1]) + '/.pio/build/esp32c3/partitions.bin'])
+    command.extend(['0x0000', str(sys.argv[1]) + '/.pio/build/BOARD_SOMATICVR_ORION/bootloader.bin'])
+    command.extend(['0x8000', str(sys.argv[1]) + '/.pio/build/BOARD_SOMATICVR_ORION/partitions.bin'])
     command.extend(['0xe000', str(sys.argv[2]) + '/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin'])
-    command.extend(['0x10000', str(sys.argv[1]) + '/.pio/build/esp32c3/firmware.bin'])
+    command.extend(['0x10000', str(sys.argv[1]) + '/.pio/build/BOARD_SOMATICVR_ORION/firmware.bin'])
 
     print(f'Using command {" ".join(command)}')
     esptool.main(command)
